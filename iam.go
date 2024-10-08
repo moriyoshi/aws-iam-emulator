@@ -21,6 +21,7 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"strings"
 	"time"
@@ -28,7 +29,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/goccy/go-yaml"
-	"github.com/rs/zerolog/log"
 )
 
 const groupIdPrefix = "AGPA"
@@ -312,7 +312,7 @@ func buildRegistryFromYAML(yamlBytes []byte) (*BasicIAMRegistry, error) {
 		users:  make(map[string]*IAMUser),
 	}
 
-	log.Info().Msg(fmt.Sprintf("%d groups and %d users found", len(y.Groups), len(y.Users)))
+	logger.Info("populating user/group DB", slog.Int("nGroups", len(y.Groups)), slog.Int("nUsers", len(y.Users)))
 
 	for i, _ := range y.Users {
 		u := &y.Users[i]
@@ -331,7 +331,7 @@ func buildRegistryFromYAML(yamlBytes []byte) (*BasicIAMRegistry, error) {
 	for i, _ := range y.Groups {
 		g := &y.Groups[i]
 		var members []*IAMUser
-		log.Info().Msg(fmt.Sprintf("group %s has %d members", g.Name, len(g.Members)))
+		logger.Info("populating group entry", slog.String("group", g.Name), slog.Int("nMembers", len(g.Members)))
 		for _, m := range g.Members {
 			u, ok := r.users[m]
 			if !ok {

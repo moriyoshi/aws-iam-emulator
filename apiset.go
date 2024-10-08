@@ -20,11 +20,11 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 	"reflect"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/rs/zerolog/log"
 )
 
 type APISet struct {
@@ -76,7 +76,7 @@ func (h *QueryOperationHandler) UnmarshalParams(req *http.Request) (interface{},
 	v := reflect.New(reflect.TypeOf(h.Proto))
 	err := UnmarshalParams(v.Interface(), req.Form, h.IsEC2)
 	if err != nil {
-		log.Info().Err(err)
+		logger.Info("error occurred", slog.String("error", err.Error()))
 		return nil, &SenderFault{
 			Code_:    "InvalidParameterValue",
 			Message_: "invalid parameter",

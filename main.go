@@ -24,18 +24,17 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"net"
 	"net/http"
 	"os"
 	"path/filepath"
-	"time"
 
 	"github.com/mattn/go-isatty"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 var rootCtx = context.Background()
+var logger *slog.Logger
 
 func listenAndServe(ctx context.Context, addr string) error {
 	l, err := (&net.ListenConfig{}).Listen(ctx, "tcp", addr)
@@ -64,7 +63,9 @@ func cmdlineErr(msg string) {
 
 func initializerLogger() {
 	if isatty.IsTerminal(os.Stdout.Fd()) {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339Nano})
+		logger = slog.New(slog.NewTextHandler(os.Stderr, nil))
+	} else {
+		logger = slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	}
 }
 
